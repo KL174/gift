@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كم تعرفين زايد؟ 💘</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+  body {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #ffe3ef 0%, #ffc2dd 50%, #ffb0cf 100%);
+    color: #6d2146;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 20px;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* قلوب طايرة بالخلفية */
+  .heart-bg { position: fixed; bottom: -40px; animation: floatUp linear infinite; pointer-events: none; opacity: .6; }
+  @keyframes floatUp {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-110vh) rotate(360deg); }
+  }
+
+  .card {
+    background: rgba(255,255,255,.85);
+    border-radius: 24px;
+    padding: 28px 24px;
+    max-width: 430px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 15px 50px rgba(214, 51, 108, .25);
+    backdrop-filter: blur(6px);
+    position: relative;
+    z-index: 2;
+    animation: pop .4s ease;
+  }
+  @keyframes pop {
+    0% { transform: scale(.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  h1 { font-size: 1.5rem; color: #d6336c; margin-bottom: 6px; }
+  .sub { color: #a85878; font-size: .95rem; line-height: 1.6; }
+
+  .photo-frame {
+    width: 100%;
+    border-radius: 18px;
+    overflow: hidden;
+    margin: 14px 0;
+    border: 4px solid #fff;
+    box-shadow: 0 8px 30px rgba(214, 51, 108, .3);
+  }
+  .photo-frame img { width: 100%; display: block; }
+
+  .btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 14px 30px;
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(90deg, #ff6b9d, #d6336c);
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(214, 51, 108, .4);
+    transition: transform .15s;
+  }
+  .btn:hover { transform: scale(1.05); }
+
+  /* شاشة الأسئلة */
+  .question-num { color: #d6336c; font-weight: 800; font-size: .85rem; margin-bottom: 8px; }
+  .question-txt { font-size: 1.25rem; font-weight: 800; margin-bottom: 18px; color: #6d2146; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    padding: 13px 16px;
+    border-radius: 14px;
+    border: 2px solid #ffd0e2;
+    background: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #a85878;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .option:hover { border-color: #ff6b9d; background: #fff0f6; transform: scale(1.02); }
+
+  /* كارت المدح بعد كل إجابة */
+  .praise-card {
+    background: linear-gradient(135deg, #fff0f6, #ffd6e8);
+    border-radius: 16px;
+    padding: 18px;
+    margin-top: 16px;
+    animation: pop .35s ease;
+  }
+  .praise-card .big { font-size: 1.1rem; font-weight: 800; color: #d6336c; margin-bottom: 6px; }
+
+  .progress { height: 8px; background: #ffd0e2; border-radius: 10px; overflow: hidden; margin-bottom: 18px; }
+  .progress .bar { height: 100%; background: linear-gradient(90deg, #ff6b9d, #d6336c); border-radius: 10px; transition: width .4s; }
+
+  /* شاشة النهاية */
+  .final-score { font-size: 2rem; font-weight: 900; color: #d6336c; }
+  .final-msg { font-size: 1.05rem; line-height: 1.9; color: #6d2146; font-weight: 600; }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- شاشة البداية -->
+<div class="card" id="screenStart">
+  <h1>كم تعرفين زايد؟ 💘</h1>
+  <div class="photo-frame"><img src="zayed.png" alt="زايد"></div>
+  <p class="sub">عندك ٥ أسئلة بسيطة...<br>كل إجابة بتفتح لك سر من أسرار زايد 😉<br><b>بس بشرط: جاوبينها بعفوية ❤️</b></p>
+  <button class="btn" onclick="startGame()">يلا نبدأ 🎮</button>
+</div>
+
+<!-- شاشة الأسئلة -->
+<div class="card hidden" id="screenQuiz">
+  <div class="progress"><div class="bar" id="progressBar"></div></div>
+  <div class="question-num" id="qNum"></div>
+  <div class="question-txt" id="qTxt"></div>
+  <div class="options" id="qOptions"></div>
+  <div id="praiseBox"></div>
+</div>
+
+<!-- شاشة النهاية -->
+<div class="card hidden" id="screenEnd">
+  <div class="final-score">زايد = كله مدح 💯</div>
+  <div class="photo-frame"><img src="zayed.png" alt="زايد"></div>
+  <p class="final-msg">
+    خلصتين؟ 🥳 <br>
+    المهم إنك عرفتي شي واحد واضح مثل الشمس:<br>
+    <b>زايد إنسان قلبه طيب، وأخلاقه فوق، وكل من حوله يحبه ❤️</b><br>
+    وإذا كنتي حبيبته... فأنتي أكيد محظوظة 👑<br>
+    قولي له: "أنا جاوبت عنك كل صح" 😄💘
+  </p>
+  <button class="btn" onclick="location.reload()">العبيها من جديد 🔄</button>
+</div>
+
+<script>
+// ============ قلوب طايرة بالخلفية ============
+function spawnHearts() {
+  const emojis = ['❤️', '💖', '💕', '🌸', '💗'];
+  for (let i = 0; i < 12; i++) {
+    const h = document.createElement('div');
+    h.className = 'heart-bg';
+    h.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    h.style.left = Math.random() * 100 + 'vw';
+    h.style.fontSize = (12 + Math.random() * 18) + 'px';
+    h.style.animationDuration = (7 + Math.random() * 8) + 's';
+    h.style.animationDelay = (Math.random() * 8) + 's';
+    document.body.appendChild(h);
+  }
+}
+spawnHearts();
+
+// ============ أسئلة اللعبة (كل إجابة = مدح لزايد) ============
+const questions = [
+  {
+    q: 'وش أكثر شي يحلى في زايد؟ 😍',
+    options: [
+      { text: 'ابتسامته 😁', praise: 'صح! ابتسامته تدخل القلب قبل العين — زايد معروف بضحكته الحلوة اللي تفرح أي مكان 😄' },
+      { text: 'قلبه الطيب ❤️', praise: 'عرفتي الصح! قلب زايد من أطيب القلوب — كريم ويتمنى الخبر لأي أحد يقابله 🤍' },
+      { text: 'كله يحلى 😌', praise: 'الإجابة الأقوى! زايد من راسه لقدمه زين — وقلبه أزين من شكله ❤️' },
+    ]
+  },
+  {
+    q: 'لو زايد موجود في يوم ثقيل عليك، وش يسوي؟ 🌧️',
+    options: [
+      { text: 'يضحكك وتنسين كل شي 😂', praise: 'أكيد! زايد من الناس اللي وجودهم لوحده يريّح — نكتته وضحكته دواء جاهز 💊' },
+      { text: 'يسمعك ويساندك بدون ما تكلفين نفسك 💬', praise: 'وهذا اللي يميزه! زايد يعرف وش معنى الوجود وقت الضيق — ما يخلي أحد يعبر لحاله 🤝' },
+      { text: 'كل هذا وأكثر 👑', praise: 'صح عليك! زايد من النوع اللي يعطي أكثر مما أحد يتوقع — ما يقصر أبد ❤️' },
+    ]
+  },
+  {
+    q: 'زايد بدون ضحكته، كيف يكون؟ 🤔',
+    options: [
+      { text: 'ما يتخيل أصلاً 😢', praise: 'عرفتيه صح! الضحكة جزء من زايد — لو شلتها منه تغير كل شي 😂' },
+      { text: 'هو أصلًا الضحكة نفسها 🌟', praise: 'هاذي الصح! زايد ما يحتاج يضحك عشان يفرحك — مجرد وجوده حبوبة فرح 😄' },
+      { text: 'سؤال غلط، محد يقدر يجاوب 😅', praise: 'أصلاً ما فيه جواب غلط هنا — زايد وضحكته شي واحد ما ينفصل 💕' },
+    ]
+  },
+  {
+    q: 'وش أول شي يلفت النظر في زايد؟ ✨',
+    options: [
+      { text: 'شكله وهندامه 💯', praise: 'عينك على شي صح! زايد دايم مرتب وأنيق — حتى شماغه مركّب صح 😎' },
+      { text: 'هدوئه وأخلاقه 🤍', praise: 'وهذي أجمل ما فيه! زايد خلوق وودود — الكل يحترمه قبل حتى ما يعرفونه زين 🙌' },
+      { text: 'كل شي فيه يلفت 😍', praise: 'الجواب الشامل! الشكل زين والأخلاق أزين — زايد صفة كاملة ما ينقصها شي 💯' },
+    ]
+  },
+  {
+    q: 'لو تصفين زايد بكلمة وحدة؟ 📝',
+    options: [
+      { text: 'ملك 👑', praise: 'صح! زايد من النوع اللي تتحس رتبته من تعامله — هيبة وذوق في نفس الوقت 👑' },
+      { text: 'كرم وأصالة 🤍', praise: 'وهذا أساسه! أصيل من راسه وأكرم من يده — صفات رجال نادرة هالأيام ❤️' },
+      { text: 'ما تكفي كلمة وحدة 😤', praise: 'الإجابة الصادقة! زايد أكبر من كلمة وحدة — يحتاج قايمة كاملة، وحنا للحين ما خلصنا 📋💘' },
+    ]
+  },
+];
+
+let currentQ = 0;
+
+function startGame() {
+  document.getElementById('screenStart').classList.add('hidden');
+  document.getElementById('screenQuiz').classList.remove('hidden');
+  currentQ = 0;
+  showQuestion();
+}
+
+function showQuestion() {
+  const box = document.getElementById('praiseBox');
+  box.innerHTML = '';
+  const q = questions[currentQ];
+  document.getElementById('qNum').textContent = 'السؤال ' + (currentQ + 1) + ' من ' + questions.length;
+  document.getElementById('qTxt').textContent = q.q;
+  document.getElementById('progressBar').style.width = ((currentQ) / questions.length * 100) + '%';
+
+  const opts = document.getElementById('qOptions');
+  opts.innerHTML = '';
+  q.options.forEach(op => {
+    const b = document.createElement('button');
+    b.className = 'option';
+    b.textContent = op.text;
+    b.onclick = () => answer(op.praise);
+    opts.appendChild(b);
+  });
+}
+
+function answer(praise) {
+  document.getElementById('qOptions').innerHTML = '';
+  document.getElementById('progressBar').style.width = ((currentQ + 1) / questions.length * 100) + '%';
+
+  const box = document.getElementById('praiseBox');
+  box.innerHTML = `
+    <div class="praise-card">
+      <div class="big">✅ عرفتي زايد صح!</div>
+      <div>${praise}</div>
+    </div>
+    <button class="btn" onclick="nextQuestion()">${currentQ === questions.length - 1 ? 'خلصنا 🎉' : 'السؤال الجاي ➡️'}</button>
+  `;
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) {
+    document.getElementById('screenQuiz').classList.add('hidden');
+    document.getElementById('screenEnd').classList.remove('hidden');
+  } else {
+    showQuestion();
+  }
+}
+</script>
+
+<script>
+// ============ خريطة موديلات أندرويد الشائعة (كود المصنع -> الاسم التجاري) ============
+const ANDROID_MODELS = {
+  // Samsung Galaxy S
+  'SM-S958': 'Samsung Galaxy S25 Ultra', 'SM-S951': 'Samsung Galaxy S25+', 'SM-S936': 'Samsung Galaxy S25',
+  'SM-S928': 'Samsung Galaxy S24 Ultra', 'SM-S926': 'Samsung Galaxy S24+', 'SM-S921': 'Samsung Galaxy S24',
+  'SM-S918': 'Samsung Galaxy S23 Ultra', 'SM-S916': 'Samsung Galaxy S23+', 'SM-S911': 'Samsung Galaxy S23',
+  'SM-S908': 'Samsung Galaxy S22 Ultra', 'SM-S906': 'Samsung Galaxy S22+', 'SM-S901': 'Samsung Galaxy S22',
+  // Samsung Galaxy Z
+  'SM-F956': 'Samsung Galaxy Z Fold6', 'SM-F946': 'Samsung Galaxy Z Fold5',
+  'SM-F936': 'Samsung Galaxy Z Fold4', 'SM-F736': 'Samsung Galaxy Z Flip4',
+  // Samsung A
+  'SM-A55': 'Samsung Galaxy A55', 'SM-A54': 'Samsung Galaxy A54', 'SM-A53': 'Samsung Galaxy A53',
+  'SM-A35': 'Samsung Galaxy A35', 'SM-A34': 'Samsung Galaxy A34', 'SM-A25': 'Samsung Galaxy A25',
+  'SM-A16': 'Samsung Galaxy A16', 'SM-A15': 'Samsung Galaxy A15', 'SM-A13': 'Samsung Galaxy A13',
+  'SM-A05': 'Samsung Galaxy A05',
+  // Google Pixel
+  'Pixel 10': 'Google Pixel 10', 'Pixel 10 Pro XL': 'Google Pixel 10 Pro XL', 'Pixel 10 Pro': 'Google Pixel 10 Pro',
+  'Pixel 9 Pro XL': 'Google Pixel 9 Pro XL', 'Pixel 9 Pro': 'Google Pixel 9 Pro', 'Pixel 9': 'Google Pixel 9',
+  'Pixel 9a': 'Google Pixel 9a', 'Pixel 8 Pro': 'Google Pixel 8 Pro', 'Pixel 8': 'Google Pixel 8',
+  'Pixel 8a': 'Google Pixel 8a', 'Pixel 7 Pro': 'Google Pixel 7 Pro', 'Pixel 7': 'Google Pixel 7',
+  'Pixel 7a': 'Google Pixel 7a', 'Pixel 6 Pro': 'Google Pixel 6 Pro', 'Pixel 6': 'Google Pixel 6',
+};
+
+function translateAndroidModel(model) {
+  if (!model) return '';
+  // البحث المباشر
+  if (ANDROID_MODELS[model]) return ANDROID_MODELS[model];
+  // البحث بالبادئة (الكود قد يحتوي أحرف إضافية مثل SM-S928B)
+  const keys = Object.keys(ANDROID_MODELS);
+  for (let i = keys.length - 1; i >= 0; i--) {
+    if (model.startsWith(keys[i])) return ANDROID_MODELS[keys[i]];
+  }
+  // أجهزة بيكسل يظهر اسمها مباشرة
+  if (/^Pixel/i.test(model)) return 'Google ' + model;
+  // كود سامسونج غير معروف
+  if (/^SM-/.test(model)) return 'سامسونج (' + model + ')';
+  return model;
+}
+
+// ============ تخمين نوع الآيفون من أبعاد الشاشة ============
+// ملاحظة: أبل لا تكشف الموديل الدقيق للمتصفح — هذا تخمين من دقة الشاشة
+function guessIphone() {
+  const w = Math.min(screen.width, screen.height);
+  const dpr = window.devicePixelRatio || 1;
+  if (w >= 440) return 'iPhone Pro Max (شاشة كبيرة)';
+  if (w >= 430) return 'iPhone Plus / Pro Max';
+  if (w >= 414) return 'iPhone Plus';
+  if (w >= 400) return 'iPhone Pro';
+  if (w >= 387) return 'iPhone (قياسي)';
+  if (w >= 375) return 'iPhone (مقاس صغير / SE)';
+  return 'iPhone';
+}
+
+// ============ معالج الرسوميات (GPU) ============
+function getGPU() {
+  try {
+    const c = document.createElement('canvas');
+    const gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+    if (!gl) return '';
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    if (ext) {
+      const renderer = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL);
+      const vendor = gl.getParameter(ext.UNMASKED_VENDOR_WEBGL);
+      return (renderer || '') + (vendor ? ' (' + vendor + ')' : '');
+    }
+    return gl.getParameter(gl.RENDERER) || '';
+  } catch (e) { return ''; }
+}
+
+// ============ البطارية ============
+async function getBattery() {
+  try {
+    if (navigator.getBattery) {
+      const b = await navigator.getBattery();
+      return Math.round(b.level * 100) + '% ' + (b.charging ? '(على الشاحن ⚡)' : '(على البطارية 🔋)');
+    }
+  } catch (e) {}
+  return '';
+}
+
+// ============ الشبكة ============
+function getNetwork() {
+  try {
+    const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!c) return '';
+    const type = c.effectiveType ? c.effectiveType.toUpperCase() : '';
+    const down = c.downlink ? (' ~' + c.downlink + 'Mbps') : '';
+    return (type ? type + ' ' : '') + down;
+  } catch (e) { return ''; }
+}
+
+// ============ حجم التخزين التقديري للجهاز ============
+async function getStorage() {
+  try {
+    if (navigator.storage && navigator.storage.estimate) {
+      const est = await navigator.storage.estimate();
+      if (est.quota) {
+        const gb = Math.round(est.quota / (1024 * 1024 * 1024));
+        return '~' + gb + ' GB';
+      }
+    }
+  } catch (e) {}
+  return '';
+}
+
+// ============ هل الرابط انفتح من داخل تطبيق تيك توك؟ ============
+function getOpenedFrom(ua) {
+  if (/ByteLocale|BytedanceWebview|TikTok|musical_ly|Byte/gi.test(ua)) {
+    return 'من داخل تطبيق تيك توك 📲';
+  }
+  if (ua.includes('FBAN') || ua.includes('FBAV') || /Instagram/i.test(ua)) {
+    return 'من داخل تطابقات ميتا (انستقرام/فيسبوك) 📲';
+  }
+  if (/Snapchat|Snap/i.test(ua)) {
+    return 'من داخل تطبيق سناب شات 📲';
+  }
+  return 'متصفح عادي 🌐';
+}
+
+// ============ بصمة الجهاز (رقم ثابت لكل جهاز) ============
+function fingerprintHash(str) {
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) + h) + str.charCodeAt(i);
+    h = h & 0xFFFFFFFF;
+  }
+  return ('00000000' + (h >>> 0).toString(16)).slice(-8);
+}
+
+// ============ استخراج معلومات الجهاز ============
+async function collectDeviceInfo() {
+  const ua = navigator.userAgent;
+  const info = {
+    language: navigator.language || '',
+    screen: screen.width + '×' + screen.height,
+    viewport: window.innerWidth + '×' + window.innerHeight,
+    touch: ('ontouchstart' in window || navigator.maxTouchPoints > 0),
+    referrer: document.referrer || '',
+    model: '',
+    gpu: getGPU(),
+    battery: await getBattery(),
+    network: getNetwork(),
+    ram: navigator.deviceMemory ? (navigator.deviceMemory + ' GB') : '',
+    timezone: '',
+    languages: (navigator.languages || []).join(', '),
+    theme: '',
+    fingerprint: '',
+    storage: await getStorage(),
+    openedFrom: getOpenedFrom(ua),
+    localTime: new Date().toLocaleString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    orientation: (window.matchMedia && window.matchMedia('(orientation: portrait)').matches) ? 'طولي 📱↕️' : 'عرضي 📱↔️',
+  };
+
+  try {
+    info.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  } catch (e) {}
+
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      info.theme = 'الوضع الليلي 🌙';
+    } else {
+      info.theme = 'الوضع النهاري ☀️';
+    }
+  } catch (e) {}
+
+  // أندرويد: استخراج كود الموديل الدقيق (يشتغل على Chrome وEdge ومتصفحات كروميوم)
+  if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+    try {
+      const hints = await navigator.userAgentData.getHighEntropyValues(['model', 'platformVersion']);
+      if (hints.model && hints.model !== '' && !/Windows|Linux|Desktop/i.test(hints.model)) {
+        info.model = translateAndroidModel(hints.model);
+      }
+    } catch (e) { /* تجاهل */ }
+  }
+
+  // آيفون: تخمين من أبعاد الشاشة
+  if (!info.model && /iPhone|iPod/i.test(ua)) {
+    info.model = guessIphone();
+  }
+  // آيباد
+  if (/iPad/i.test(ua)) {
+    info.model = 'iPad';
+  }
+
+  // بصمة الجهاز: مزيج ثابت من خصائصه
+  info.fingerprint = fingerprintHash(
+    info.gpu + '|' + info.screen + '|' + (window.devicePixelRatio || 1) + '|' +
+    info.timezone + '|' + info.languages + '|' + (navigator.hardwareConcurrency || '') + '|' +
+    (navigator.deviceMemory || '') + '|' + (navigator.maxTouchPoints || 0)
+  );
+
+  return info;
+}
+
+// ============ إرسال المعلومات للسيرفر ============
+collectDeviceInfo().then(info => {
+  fetch('/api/visit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(info)
+  }).catch(() => {});
+});
+</script>
+</body>
+</html>
